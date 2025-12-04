@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lista de Compras Moderna</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+  font-family: "Poppins", sans-serif;
+  background: #121212;
+  color: #f2f2f2;
+  display: flex;
+  justify-content: center;
+  padding-top: 60px;
+}
+
+.container {
+  background: #1e1e1e;
+  padding: 25px;
+  border-radius: 14px;
+  width: 360px;
+  box-shadow: 0 0 18px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(6px);
+  animation: fadeIn .5s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+h1 {
+  text-align: center;
+  color: #ffffff;
+  letter-spacing: 1px;
+  margin-bottom: 20px;
+}
+
+.input-area {
+  display: flex;
+  gap: 10px;
+}
+
+input {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  background: #2c2c2c;
+  color: #fff;
+  font-size: 15px;
+}
+
+#addItemBtn {
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #6c63ff, #8b82ff);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+#addItemBtn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 10px #6c63ff;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin-top: 25px;
+}
+
+li {
+  background: #2a2a2a;
+  padding: 14px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: .3s;
+}
+
+li:hover {
+  transform: translateX(4px);
+  background: #333;
+}
+
+li span {
+  flex: 1;
+  font-size: 16px;
+}
+
+li.comprado span {
+  text-decoration: line-through;
+  opacity: .5;
+}
+
+.editBtn,
+.deleteBtn {
+  border: none;
+  padding: 7px 10px;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+  margin-left: 6px;
+  transition: 0.2s;
+}
+
+.editBtn {
+  background-color: #f0ad4e;
+}
+.editBtn:hover {
+  background-color: #d8902d;
+}
+
+.deleteBtn {
+  background-color: #e74c3c;
+}
+.deleteBtn:hover {
+  background-color: #c0392b;
+}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Lista de Compras</h1>
+    <div class="input-area">
+      <input type="text" id="itemInput" placeholder="Digite um item..." />
+      <button id="addItemBtn">Adicionar</button>
+    </div>
+    <ul id="lista"></ul>
+  </div>
+  <script src="script.js"></script>
+  <script>
+    const input = document.querySelector("#itemInput");
+const button = document.querySelector("#addItemBtn");
+const lista = document.querySelector("#lista");
+
+let itens = JSON.parse(localStorage.getItem("itens")) || [];
+
+function salvarLista() {
+  localStorage.setItem("itens", JSON.stringify(itens));
+}
+
+function renderizarLista() {
+  lista.innerHTML = "";
+
+  itens.forEach((item, index) => {
+    const li = document.createElement("li");
+
+    const texto = document.createElement("span");
+    texto.textContent = item.nome;
+
+    if (item.comprado) li.classList.add("comprado");
+
+    texto.addEventListener("click", () => {
+      item.comprado = !item.comprado;
+      salvarLista();
+      renderizarLista();
+    });
+
+    const btnEditar = document.createElement("button");
+    btnEditar.textContent = "✎";
+    btnEditar.className = "editBtn";
+
+    btnEditar.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const novoTexto = prompt("Editar item:", item.nome);
+
+      if (novoTexto && novoTexto.trim() !== "") {
+        item.nome = novoTexto.trim();
+        salvarLista();
+        renderizarLista();
+      }
+    });
+
+    const btnExcluir = document.createElement("button");
+    btnExcluir.textContent = "X";
+    btnExcluir.className = "deleteBtn";
+
+    btnExcluir.addEventListener("click", (e) => {
+      e.stopPropagation();
+      itens.splice(index, 1);
+      salvarLista();
+      renderizarLista();
+    });
+
+    li.appendChild(texto);
+    li.appendChild(btnEditar);
+    li.appendChild(btnExcluir);
+
+    lista.appendChild(li);
+  });
+}
+
+button.addEventListener("click", () => {
+  const nomeItem = input.value.trim();
+
+  if (nomeItem !== "") {
+    itens.push({ nome: nomeItem, comprado: false });
+    input.value = "";
+    salvarLista();
+    renderizarLista();
+  }
+});
+
+renderizarLista();
+
+  </script>
+</body>
+</html>
+
+
